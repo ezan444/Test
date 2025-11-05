@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk, filedialog, messagebox, colorchooser
+from tkinter import ttk, filedialog, messagebox
 import qrcode
 from PIL import Image, ImageTk, ImageDraw
 import os
@@ -13,8 +13,6 @@ class QRCodeGenerator:
         
         self.logo_path = None
         self.qr_image = None
-        self.qr_color = "#000000"
-        self.bg_color = "#FFFFFF"
         
         self.setup_ui()
     
@@ -101,7 +99,7 @@ class QRCodeGenerator:
         
         self.error_var = tk.StringVar(value="High (Recommended)")
         error_combo = ttk.Combobox(left_frame, textvariable=self.error_var,
-                                   values=["Low", "Medium", "Quartile", "High (Recommended)"],
+                                   values=["Low", "Medium", "High (Recommended)"],
                                    state="readonly", font=("Segoe UI", 9))
         error_combo.pack(fill="x", pady=(0, 15))
         
@@ -126,39 +124,6 @@ class QRCodeGenerator:
                                        bg="white", fg="#333", width=5)
         self.logo_size_label.pack(side="left", padx=5)
         self.logo_size_var.trace('w', self.update_logo_size_label)
-        
-        # Colors
-        tk.Label(left_frame, text="Colors:", 
-                font=("Segoe UI", 10), bg="white", fg="#555").pack(anchor="w", pady=(5, 5))
-        
-        color_frame = tk.Frame(left_frame, bg="white")
-        color_frame.pack(fill="x", pady=(0, 20))
-        
-        # QR Color
-        qr_color_frame = tk.Frame(color_frame, bg="white")
-        qr_color_frame.pack(side="left", padx=(0, 20))
-        
-        tk.Label(qr_color_frame, text="QR Color:", 
-                font=("Segoe UI", 9), bg="white", fg="#555").pack()
-        self.qr_color_btn = tk.Button(qr_color_frame, bg=self.qr_color,
-                                     width=8, height=2,
-                                     command=lambda: self.choose_color("qr"),
-                                     relief="solid", borderwidth=1,
-                                     cursor="hand2")
-        self.qr_color_btn.pack(pady=5)
-        
-        # Background Color
-        bg_color_frame = tk.Frame(color_frame, bg="white")
-        bg_color_frame.pack(side="left")
-        
-        tk.Label(bg_color_frame, text="Background:", 
-                font=("Segoe UI", 9), bg="white", fg="#555").pack()
-        self.bg_color_btn = tk.Button(bg_color_frame, bg=self.bg_color,
-                                     width=8, height=2,
-                                     command=lambda: self.choose_color("bg"),
-                                     relief="solid", borderwidth=1,
-                                     cursor="hand2")
-        self.bg_color_btn.pack(pady=5)
         
         # Buttons
         button_frame = tk.Frame(left_frame, bg="white")
@@ -208,16 +173,6 @@ class QRCodeGenerator:
     def update_logo_size_label(self, *args):
         self.logo_size_label.config(text=f"{self.logo_size_var.get()}%")
     
-    def choose_color(self, color_type):
-        color = colorchooser.askcolor(title=f"Choose {'QR' if color_type == 'qr' else 'Background'} Color")
-        if color[1]:
-            if color_type == "qr":
-                self.qr_color = color[1]
-                self.qr_color_btn.config(bg=self.qr_color)
-            else:
-                self.bg_color = color[1]
-                self.bg_color_btn.config(bg=self.bg_color)
-    
     def select_logo(self):
         file_path = filedialog.askopenfilename(
             title="Select Logo Image",
@@ -255,7 +210,6 @@ class QRCodeGenerator:
         error_map = {
             "Low": qrcode.constants.ERROR_CORRECT_L,
             "Medium": qrcode.constants.ERROR_CORRECT_M,
-            "Quartile": qrcode.constants.ERROR_CORRECT_Q,
             "High (Recommended)": qrcode.constants.ERROR_CORRECT_H
         }
         error_level = error_map[self.error_var.get()]
@@ -275,8 +229,8 @@ class QRCodeGenerator:
         qr.make(fit=True)
         
         # Generate QR code image with colors
-        qr_img = qr.make_image(fill_color=self.qr_color, 
-                              back_color=self.bg_color).convert('RGBA')
+        qr_img = qr.make_image(fill_color="black", 
+                              back_color="white").convert('RGBA')
         
         # Resize QR code to target size
         qr_img = qr_img.resize((target_size, target_size), Image.Resampling.LANCZOS)
